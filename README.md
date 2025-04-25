@@ -1,7 +1,7 @@
 # AI-Driven-Medical-Diagnosis-First-Aid-with-LLM-for-Enhanced-Patient-Assistance
 
 
-Medical AI adalah chatbot berbasis AI yang membantu memberikan edukasi dan analisis awal terhadap gejala medis yang dirasakan pasien. Chatbot ini menggunakan kombinasi model BioBERT, BioGPT, dan Gemini untuk mendeteksi kondisi, memberikan penjelasan, dan merekomendasikan konsultasi dengan spesialis terkait.
+Projecr ini adalah chatbot berbasis AI yang membantu memberikan edukasi dan analisis awal terhadap gejala medis yang dirasakan pasien. Chatbot ini menggunakan kombinasi model BioBERT, BioGPT, dan Gemini untuk mendeteksi kondisi, memberikan penjelasan, dan merekomendasikan konsultasi dengan spesialis terkait.
 
 
 ---
@@ -100,11 +100,7 @@ genai.configure(api_key="API_KEY_ANDA")
 
 Test Case dan Evaluasi
 
-Sistem diuji dengan 2 kasus gejala umum:
-
-Diabetes: "Saya sering haus dan penglihatan kabur"
-
-Hipertensi: "Kepala saya sakit dan mimisan"
+Sistem diuji dengan 10 kasus gejala umum:
 
 
 Hasil evaluasi mencakup:
