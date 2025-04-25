@@ -54,9 +54,9 @@ pip install transformers torch evaluate google-generativeai ipywidgets pandas
 
 Struktur Proyek
 
-├── main.py
-├── README.md
-└── requirements.txt
+ main.py
+ README.md
+ requirements.txt
 
 
 ---
@@ -70,7 +70,7 @@ python main.py
 
 Hardware dan Kecepatan Inference
 
-Perangkat uji : Google Colab (GPU Tesla T4/RTX A100 tergantung persediaan)
+Perangkat uji : Google Colab (GPU Tesla T4 with ram 16GB (GDDR6))
 
 Kecepatan Inference (rata-rata):
 
