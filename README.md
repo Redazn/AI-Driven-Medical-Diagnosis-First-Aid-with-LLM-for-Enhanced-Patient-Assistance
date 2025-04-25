@@ -16,8 +16,6 @@ Generasi jawaban medis awal menggunakan BioGPT
 
 Penyempurnaan dan penyederhanaan bahasa medis menggunakan Gemini
 
-Benchmarking sistem dengan test case gejala nyata
-
 Antarmuka pengguna interaktif berbasis IPython widgets
 
 
@@ -121,7 +119,7 @@ Deteksi kata kunci gejala
 
 ---
 
-Penanganan Error
+Penanganan Error dan etika
 
 Tiga kelas error utama:
 
