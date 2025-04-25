@@ -119,6 +119,27 @@ Deteksi kata kunci gejala
 
 ---
 
+Contoh Kinerja
+
+Pasien: badan saya sering nyeri, kadang tulang tuh sering kaku di saat bangun tidur 
+
+🤖 Asisten Medis (Waktu respon: 3.56s):
+
+        ### Diagnosis Kemungkinan
+Nyeri tubuh dan kekakuan sendi, terutama di pagi hari, bisa disebabkan beberapa hal. Bayangkan tubuhmu seperti mobil tua yang perlu pelumas. Bisa jadi "pelumas" sendimu (cairan sinovial) berkurang, sehingga pergerakan terasa kaku dan nyeri. Ini bisa terjadi karena usia, kurang gerak, atau bahkan kondisi seperti arthritis (radang sendi). Atau mungkin ada otot yang tegang karena aktivitas atau posisi tidur yang salah. 
+
+💊 Rekomendasi Obat: Parasetamol (Paracetamol): Obat pereda nyeri yang dijual bebas. Ikuti petunjuk dosis pada kemasan. Jangan melebihi dosis maksimal harian.Ibuprofen (Brufen, dll.): Obat anti-inflamasi nonsteroid (OAINS) yang juga dijual bebas, membantu mengurangi peradangan dan nyeri. Ikuti petunjuk dosis pada kemasan. Jangan digunakan jika Anda memiliki riwayat maag. 
+
+🏥 Konsultasi Spesialis: Jika nyeri dan kekakuan terus berlanjut atau memburuk, sebaiknya konsultasikan ke dokter umum atau spesialis Reumatologi (ahli penyakit sendi dan rematik) atau Ortopedi (ahli penyakit tulang dan sendi). 
+
+⚠️ Peringatan: Hasil ini bukan diagnosis pasti. Segera hubungi dokter jika nyeri sangat hebat, disertai demam, bengkak di sendi yang signifikan, atau keluhan lain yang mengkhawatirkan. Jangan mengonsumsi obat-obatan OTC secara berlebihan tanpa berkonsultasi dengan dokter. 
+
+📌 Kode ICD-10: (Tidak dapat diberikan tanpa pemeriksaan fisik dan diagnosa pasti. Kode ICD-10 akan diberikan oleh dokter setelah pemeriksaan
+
+
+
+---
+
 Penanganan Error dan etika
 
 Tiga kelas error utama:
