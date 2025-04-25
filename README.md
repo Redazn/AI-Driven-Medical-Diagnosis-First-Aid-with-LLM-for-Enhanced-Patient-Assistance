@@ -109,13 +109,19 @@ Hipertensi: "Kepala saya sakit dan mimisan"
 
 Hasil evaluasi mencakup:
 
+=Recall sensivity, Precision, Specificity, Threshold
+
 Keyword Accuracy
+
+= Moderade, akurasi (70%-80%) tapi risk underdiagnosis untuk kondisi serius.
 
 Exact Match
 
+= Perlu banyak Penyempitan DDx dengan skor klinis, Threshold terlalu konservatif untuk gejala beresiko tinggi
+
 Deteksi kata kunci gejala
 
-
+= Precision, False positif tinggi. Recall, False negatif tinggi. Threshold, tidak optimal.
 
 ---
 
@@ -151,4 +157,4 @@ Proyek ini open-source dan bebas digunakan untuk keperluan edukasi dan penelitia
 
 Kontributor
 
-
+Riset pribadi
