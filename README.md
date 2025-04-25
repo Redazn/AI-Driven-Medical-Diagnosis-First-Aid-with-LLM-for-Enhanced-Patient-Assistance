@@ -160,7 +160,7 @@ Hasil ini bukan diagnosis pasti. Segera hubungi dokter jika demam Anda lebih dar
 
 ---
 
-Penanganan Error dan etika
+Penanganan Error dan Etika
 
 Tiga kelas error utama:
 
