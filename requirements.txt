@@ -1,0 +1,7 @@
+transformers 
+torch 
+google-generativeai 
+ipywidgets 
+sacremoses 
+evaluate 
+rouge_score
