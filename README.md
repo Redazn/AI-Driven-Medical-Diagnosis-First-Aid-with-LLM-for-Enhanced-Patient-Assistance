@@ -55,7 +55,9 @@ pip install transformers torch evaluate google-generativeai ipywidgets pandas
 Struktur Proyek
 
  main.py
+ 
  README.md
+
  requirements.txt
 
 
