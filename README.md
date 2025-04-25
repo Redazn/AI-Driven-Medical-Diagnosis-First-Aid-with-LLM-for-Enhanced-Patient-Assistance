@@ -137,7 +137,7 @@ MedicalChatError: Error umum lainnya dalam proses
 
 Catatan Penggunaan
 
-> Penting: MedicalAI bukan pengganti diagnosis medis profesional. Selalu konsultasikan kondisi Anda ke dokter.
+> Penting: model AI ini bukan pengganti diagnosis medis profesional. Selalu konsultasi dokter untuk penyesuaian kebutuhan anda.
 
 
 
@@ -146,7 +146,7 @@ Catatan Penggunaan
 
 Lisensi
 
-Proyek ini open-source dan bebas digunakan untuk keperluan edukasi dan penelitian. Mohon sertakan atribusi apabila digunakan secara publik.
+Project ini open-source dan bebas digunakan untuk keperluan edukasi dan penelitian. Mohon sertakan atribusi apabila digunakan secara publik. License Apache 2.0
 
 
 ---
