@@ -33,7 +33,7 @@ Arsitektur
 3. Gemini 1.5 Flash: Untuk menyederhanakan dan merapikan jawaban akhir
 
 
-4. Database Medis: 15 Format dictionary statis berisi gejala, obat, spesialis, dan kode ICD-10
+4. Database Medis: 15 Format dictionary statis berisi gejala, obat, spesialis, dan kode ICD-10 (bisa ditambahkan manual, untuk kebutuhan spesifik)
 
 
 5. Benchmark Tools: Evaluasi performa berbasis keyword matching dan exact match
