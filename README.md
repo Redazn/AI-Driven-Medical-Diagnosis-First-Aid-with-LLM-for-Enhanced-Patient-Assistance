@@ -136,7 +136,27 @@ Nyeri tubuh dan kekakuan sendi, terutama di pagi hari, bisa disebabkan beberapa 
 
 📌 Kode ICD-10: (Tidak dapat diberikan tanpa pemeriksaan fisik dan diagnosa pasti. Kode ICD-10 akan diberikan oleh dokter setelah pemeriksaan
 
+Contoh Kinerja ke 2
 
+kepala saya pusing dan badan saya panas, apakah saya harus meminum paracetamol?
+
+            **🤖 Asisten Medis** (Waktu respon: 3.59s):
+            ### Diagnosis Kemungkinan
+Kepala pusing dan badan panas bisa seperti mobil yang overheat. Mesinnya (tubuh Anda) bekerja terlalu keras dan butuh didinginkan. Bisa karena demam, infeksi ringan, atau kelelahan. Tapi, bisa juga karena hal lain yang lebih serius, jadi kita perlu memastikannya.
+
+💊 Rekomendasi Obat:
+
+Paracetamol (atau Acetaminophen) bisa membantu menurunkan demam dan mengurangi rasa sakit kepala. Ikuti petunjuk penggunaan pada kemasan. Biasanya dosis untuk dewasa adalah 500mg – 1000mg setiap 4-6 jam, maksimal 4000mg dalam sehari. Jangan melebihi dosis yang dianjurkan.
+
+🏥 Konsultasi Spesialis:
+
+Jika gejala Anda memburuk (misalnya demam tinggi yang tidak turun, pusing yang hebat, muntah-muntah, atau muncul gejala lain seperti kaku kuduk), sebaiknya segera konsultasi ke dokter umum.
+
+⚠️ Peringatan:
+
+Hasil ini bukan diagnosis pasti. Segera hubungi dokter jika demam Anda lebih dari 3 hari, disertai sakit kepala hebat, kesulitan bernapas, rasa sakit dada, kejang, atau ruam kulit. Paracetamol juga dapat menyebabkan efek samping, baca informasi lengkap pada kemasan.
+
+📌 Kode ICD-10: Tidak dapat diberikan tanpa pemeriksaan fisik. Kode ICD-10 bervariasi tergantung diagnosis pasti.
 
 ---
 
