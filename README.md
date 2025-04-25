@@ -1,1 +1,1 @@
-# Redazn-AI-Driven-Medical-Diagnosis-First-Aid-with-LLM-for-Enhanced-Patient-Assistance
+# AI-Driven-Medical-Diagnosis-First-Aid-with-LLM-for-Enhanced-Patient-Assistance
