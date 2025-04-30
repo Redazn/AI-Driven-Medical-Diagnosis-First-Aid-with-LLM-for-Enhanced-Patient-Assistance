@@ -8,7 +8,8 @@ Proyek ini adalah **chatbot berbasis AI** yang dirancang untuk membantu diagnosi
 - **Refinement** menggunakan Gemini AI untuk meningkatkan kualitas respons.
 
 > **Catatan Penting**:
-> Aplikasi ini bertujuan untuk memberikan informasi medis yang edukatif dan **tidak menggantikan diagnosis atau konsultasi medis profesional, tidak ada garansi jika anda menggunakan secara komersial!**.
+> Kode dalam proyek ini disediakan apa adanya tanpa jaminan apa pun, tersurat maupun tersirat. Penggunaan untuk keperluan pribadi, edukasi, maupun komersial sepenuhnya menjadi tanggung jawab pengguna. Penulis tidak bertanggung jawab atas kerugian atau tuntutan hukum yang timbul dari penggunaan proyek ini.
+**Aplikasi ini bertujuan untuk memberikan informasi medis yang edukatif dan tidak menggantikan diagnosis atau konsultasi medis profesional**.
 
 ---
 
