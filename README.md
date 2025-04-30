@@ -76,8 +76,7 @@ Proyek ini adalah **chatbot berbasis AI** yang dirancang untuk membantu diagnosi
    ```bash
    pip install -r requirements.txt
    ```
-3. Ganti API key Anda: ```genai.configure(api_key="GANTI_API_KEY_ANDA")  # Ganti dengan API key
-            model = genai.GenerativeModel('gemini-1.5-flash')```
+3. Ganti API key Anda: ```genai.configure(api_key="GANTI_API_KEY_ANDA")  # Ganti dengan API key```
 
 ---
 
