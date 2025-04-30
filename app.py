@@ -1,6 +1,15 @@
 
+# -*- coding: utf-8 -*-
+"""
+MEDICAL CHATBOT WITH RAG AND CONFIDENCE SCORING - OPTIMIZED VERSION
+"""
+
+# ===== 1. INSTALASI PAKET =====
+# !pip install transformers torch google-generativeai ipywidgets sacremoses rouge-score faiss-cpu sentence-transformers datasets evaluate plotly
+
+# ===== 2. IMPORT LIBRARY =====
 import numpy as np
-from evaluate import load
+import evaluate
 import pandas as pd
 import time
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoModel
@@ -8,15 +17,52 @@ import google.generativeai as genai
 import torch
 from IPython.display import display, Markdown
 import ipywidgets as widgets
+from sentence_transformers import SentenceTransformer
+import faiss
+from datasets import load_dataset
+import os
+import warnings
+import plotly.graph_objects as go
+warnings.filterwarnings('ignore')
 
-# ===== 1. Inisialisasi Model =====
+# ===== 3. ERROR HANDLING =====
+class MedicalChatError(Exception):
+    """Base class for medical chatbot errors"""
+    pass
+
+class SafetyFilterError(MedicalChatError):
+    """Error for blocked content"""
+    pass
+
+class ModelOverloadError(MedicalChatError):
+    """Error for GPU overload"""
+    pass
+
+def handle_errors(func):
+    """Decorator for error handling"""
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except Exception as e:
+            if "blocked" in str(e).lower() or "safety" in str(e).lower():
+                raise SafetyFilterError("Konten diblokir: Pertanyaan mengandung konten sensitif")
+            elif isinstance(e, torch.cuda.OutOfMemoryError):
+                raise ModelOverloadError("GPU overload: Silakan gunakan pertanyaan lebih pendek")
+            elif "invalid literal for int()" in str(e):
+                raise MedicalChatError("Format data tidak valid - silakan coba pertanyaan lain")
+            else:
+                raise MedicalChatError(f"Error sistem: {str(e)}")
+    return wrapper
+
+# ===== 4. MODEL LOADING =====
 def load_models():
+    """Memuat semua model yang diperlukan"""
     try:
-        # BioBERT
+        print("🔍 Memuat BioBERT untuk entity recognition...")
         biobert = AutoModel.from_pretrained("dmis-lab/biobert-v1.1")
         biobert_tokenizer = AutoTokenizer.from_pretrained("dmis-lab/biobert-v1.1")
 
-        # BioGPT
+        print("🧠 Memuat BioGPT untuk generasi teks...")
         biogpt = AutoModelForCausalLM.from_pretrained(
             "microsoft/biogpt",
             device_map="auto",
@@ -24,190 +70,283 @@ def load_models():
         )
         biogpt_tokenizer = AutoTokenizer.from_pretrained("microsoft/biogpt")
 
-        return biobert, biobert_tokenizer, biogpt, biogpt_tokenizer
+        print("📚 Memuat Sentence Transformer untuk embeddings...")
+        embedder = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+
+        return biobert, biobert_tokenizer, biogpt, biogpt_tokenizer, embedder
 
     except Exception as e:
         print(f"❌ Error loading models: {str(e)}")
         raise
 
-# ===== 2. Enhanced Medical Database =====
-MEDICAL_DB = {
-    "diabetes": {
-        "gejala": ["haus berlebihan", "luka sulit sembuh", "kaki nyeri", "penglihatan kabur"],
-        "obat": ["metformin", "insulin", "glibenclamide"],
-        "spesialis": "Endokrinologi",
-        "kode_icd": "E11"
-    },
-    "hipertensi": {
-        "gejala": ["sakit kepala", "pusing", "mimisan", "nyeri dada"],
-        "obat": ["amlodipine", "captopril", "losartan"],
-        "spesialis": "Kardiologi",
-        "kode_icd": "I10"
-    }
-}
-
-# ===== 3. Advanced Error Handling =====
-class MedicalChatError(Exception):
-    pass
-
-class SafetyFilterError(MedicalChatError):
-    pass
-
-class ModelOverloadError(MedicalChatError):
-    pass
-
-def handle_errors(func):
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except genai.types.BlockedPromptError:
-            raise SafetyFilterError("Konten diblokir: Pertanyaan mengandung konten sensitif")
-        except torch.cuda.OutOfMemoryError:
-            raise ModelOverloadError("GPU overload: Silakan gunakan pertanyaan lebih pendek")
-        except Exception as e:
-            raise MedicalChatError(f"Error sistem: {str(e)}")
-    return wrapper
-
-# ===== 4. Simplified Benchmarking Tools =====
-def simple_evaluate(prediction, reference):
-    """Evaluasi sederhana tanpa dependency tambahan"""
-    pred_lower = prediction.lower()
-    ref_lower = reference.lower()
-
-    # Hitung akurasi kata kunci
-    keywords = ref_lower.split()
-    matches = sum(1 for kw in keywords if kw in pred_lower)
-    keyword_accuracy = matches / len(keywords) if keywords else 0
-
-    return {
-        "keyword_accuracy": keyword_accuracy,
-        "exact_match": int(pred_lower == ref_lower)
-    }
-
-# ===== 5. Enhanced Medical Function =====
-@handle_errors
-def answer_medical_question(question):
-    # Langkah 1: Ekstraksi Entitas Medis
-    inputs = biobert_tokenizer(question, return_tensors="pt").to(biobert.device)
-    with torch.no_grad():
-        outputs = biobert(**inputs)
-
-    # Langkah 2: Deteksi Kondisi
-    tokens = biobert_tokenizer.convert_ids_to_tokens(inputs["input_ids"][0])
-    symptoms = [token for token in tokens if token not in ["[CLS]", "[SEP]", "?", "."]]
-
-    possible_conditions = []
-    for condition, data in MEDICAL_DB.items():
-        symptom_matches = [s for s in symptoms if s in data["gejala"]]
-        if len(symptom_matches) >= 2:
-            possible_conditions.append((
-                condition,
-                len(symptom_matches)/len(data["gejala"]),
-                symptom_matches
-            ))
-
-    # Langkah 3: Generasi Jawaban
-    if possible_conditions:
-        condition_info = "\n".join([
-            f"{cond[0]} (Kecocokan: {cond[1]*100:.1f}%)\n"
-            f"- Gejala Terdeteksi: {', '.join(cond[2])}\n"
-            f"- Kemungkinan Obat: {', '.join(MEDICAL_DB[cond[0]]['obat'])}"
-            for cond in sorted(possible_conditions, key=lambda x: x[1], reverse=True)[:2]
-        ])
-
-        prompt = f"""
-        [INSTRUKSI MEDIS]
-        1. Identifikasi kondisi dari gejala: {', '.join(symptoms)}
-        2. Kondisi yang mungkin: {condition_info}
-        3. Berikan penjelasan untuk pasien dengan:
-           - Bahasa sederhana
-           - Format ICD-10
-           - Peringatan konsultasi dokter
-        """
-    else:
-        prompt = f"Jawab pertanyaan medis: {question}\nGunakan bahasa awam."
-
-    # Generasi dengan BioGPT
-    inputs = biogpt_tokenizer(prompt, return_tensors="pt").to(biogpt.device)
-    output = biogpt.generate(
-        **inputs,
-        max_new_tokens=300,
-        do_sample=True,
-        temperature=0.7,
-        top_p=0.9
-    )
-    draft = biogpt_tokenizer.decode(output[0], skip_special_tokens=True)
-
-    # Langkah 4: Penyempurnaan dengan Gemini
+# ===== 5. RAG DATASET SOLUTION =====
+def setup_medical_rag(embedder):
+    """Menyiapkan database medis dengan fallback options"""
     try:
-        genai.configure(api_key="API_KEY_ANDA")
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        # Coba beberapa dataset medis gratis secara berurutan
+        dataset_options = [
+            ("medquad", None),  # Pertanyaan-jawaban medis
+            ("medalpaca/medical_meadow_medical_flashcards", None),  # Flashcards medis
+            ("medalpaca/medical_meadow_wikidoc", None)  # Artikel medis
+        ]
 
-        response = model.generate_content(f"""
-        Anda adalah dokter senior. Sederhanakan ini untuk pasien:
+        for ds_name, config in dataset_options:
+            try:
+                print(f"🔎 Mencoba dataset: {ds_name}...")
+                dataset = load_dataset(ds_name, config, split='train')
+                break
+            except:
+                continue
+        else:
+            raise Exception("Semua dataset gagal diakses")
 
-        [DRAFT ASLI]
-        {draft}
+        # Proses dataset yang berhasil di-load
+        df = dataset.to_pandas()
 
-        [FORMAT OUTPUT]
-        ### Diagnosis Kemungkinan
-        (Jelaskan dengan analogi sehari-hari)
+        # Handle berbagai format dataset
+        if 'question' in df.columns and 'answer' in df.columns:
+            df = df[['question', 'answer']]
+        elif 'input' in df.columns and 'output' in df.columns:  # Format Alpaca
+            df = df.rename(columns={'input': 'question', 'output': 'answer'})
+        elif 'context' in df.columns and 'answer' in df.columns:  # Format SQuAD
+            df = df.rename(columns={'context': 'question'})
 
-        💊 Rekomendasi Obat:
-        (Hanya obat OTC, sertakan dosis umum)
+        # Filter data kosong
+        df = df[(df['question'].str.len() > 0) & (df['answer'].str.len() > 0)]
 
-        🏥 Konsultasi Spesialis:
-        (Spesialis yang relevan)
+        # Buat embeddings
+        print("🔧 Membuat embeddings...")
+        embeddings = embedder.encode(df['question'].tolist(), show_progress_bar=True).astype('float32')
 
-        ⚠️ Peringatan:
-        "Hasil ini bukan diagnosis pasti. Segera hubungi dokter jika..."
+        # Buat FAISS index
+        dimension = embeddings.shape[1]
+        index = faiss.IndexFlatL2(dimension)
+        index.add(embeddings)
 
-        📌 Kode ICD-10: (jika tersedia)
-        """)
+        # Mapping ID ke teks
+        id_to_text = {int(i): (str(q), str(a)) for i, (q, a) in enumerate(zip(df['question'], df['answer']))}
 
-        return response.text
+        print(f"✅ Database medis siap! ({len(df)} entri)")
+        return index, id_to_text
 
     except Exception as e:
-        raise MedicalChatError(f"Error pada Gemini: {str(e)}")
+        print(f"❌ Error setting up RAG: {str(e)}")
+        print("🔄 Menggunakan dataset contoh minimal...")
+        # Fallback dataset minimal
+        samples = [
+            ("Apa gejala diabetes?", "Gejala diabetes: sering haus, sering buang air kecil, lemas."),
+            ("Bagaimana mengatasi demam?", "Istirahat, minum air, kompres hangat, parasetamol."),
+            ("Pertolongan pertama sesak nafas?", "Tenangkan pasien, cari udara segar, hubungi dokter.")
+        ]
+        questions = [q for q, a in samples]
+        embeddings = embedder.encode(questions).astype('float32')
+        index = faiss.IndexFlatL2(embeddings.shape[1])
+        index.add(embeddings)
+        id_to_text = {int(i): samples[i] for i in range(len(samples))}
+        return index, id_to_text
 
-# ===== 6. Benchmarking System =====
+# ===== 6. OPTIMIZED CONFIDENCE SCORING SYSTEM =====
+def calculate_confidence(response, context, question, embedder, cache={}):
+    """Enhanced confidence calculation with caching and better metrics"""
+    cache_key = f"{hash(response)}-{hash(context)}"
+    if cache_key in cache:
+        return cache[cache_key]
+
+    # 1. Semantic similarity with context
+    resp_embed = embedder.encode(response)
+    ctx_embed = embedder.encode(context)
+    semantic_sim = np.dot(resp_embed, ctx_embed) / (np.linalg.norm(resp_embed) * np.linalg.norm(ctx_embed))
+
+    # 2. Response completeness
+    question_keywords = set([w.lower() for w in question.split() if len(w) > 3])
+    response_words = set([w.lower() for w in response.split()])
+    completeness = len(question_keywords.intersection(response_words)) / max(1, len(question_keywords))
+
+    # 3. Medical terminology presence
+    medical_terms = {
+        "high": ["diagnosis", "treatment", "symptoms", "clinical", "prognosis", "pathology"],
+        "medium": ["drug", "dose", "medication", "disease", "condition", "therapy"],
+        "low": ["health", "medical", "doctor", "hospital", "patient", "care"]
+    }
+
+    weights = {"high": 1.0, "medium": 0.7, "low": 0.4}
+    term_scores = []
+
+    for priority, terms in medical_terms.items():
+        matches = sum(term.lower() in response.lower() for term in terms)
+        if len(terms) > 0:
+            term_scores.append(weights[priority] * (matches / len(terms)))
+
+    medical_term_score = sum(term_scores) / len(term_scores) if term_scores else 0
+
+    # 4. Uncertainty analysis
+    uncertainty_phrases = [
+        ("might be", 0.7), ("may be", 0.7), ("possibly", 0.6),
+        ("potentially", 0.6), ("could be", 0.6), ("appears to be", 0.5),
+        ("suggest", 0.4), ("consider", 0.4), ("uncertain", 0.9),
+        ("not clear", 0.8), ("unclear", 0.8), ("unknown", 0.7)
+    ]
+
+    uncertainty_score = 0
+    matches = 0
+    for phrase, weight in uncertainty_phrases:
+        if phrase in response.lower():
+            uncertainty_score += weight
+            matches += 1
+
+    uncertainty = uncertainty_score / max(1, matches) if matches > 0 else 0
+
+    # 5. Length appropriateness
+    length_ratio = len(response) / (len(context) + 1e-6)
+    length_score = 1.0 if 0.2 <= length_ratio <= 1.5 else max(0, 1 - abs(length_ratio - 0.85) / 2)
+
+    # 6. Structure assessment
+    structure_indicators = [
+        "\n-", "\n•", "\n1.", "\n2.", "Pertama", "Kedua", "Terakhir",
+        "Gejala:", "Penyebab:", "Pengobatan:"
+    ]
+    structure_score = min(1.0, sum(indicator in response for indicator in structure_indicators) / 3)
+
+    # Combined confidence
+    confidence = (
+        0.35 * semantic_sim +
+        0.20 * completeness +
+        0.25 * medical_term_score +
+        0.15 * (1 - uncertainty) +
+        0.05 * length_score +
+        0.10 * structure_score
+    )
+
+    result = {
+        "confidence_score": max(0, min(1, confidence)),
+        "metrics": {
+            "semantic_similarity": round(semantic_sim, 2),
+            "completeness": round(completeness, 2),
+            "medical_terms": round(medical_term_score, 2),
+            "certainty": round(1 - uncertainty, 2),
+            "length_appropriateness": round(length_score, 2),
+            "structure": round(structure_score, 2)
+        }
+    }
+
+    cache[cache_key] = result
+    return result
+
+# ===== 7. MODIFIED ANSWER FUNCTION =====
+@handle_errors
+def answer_medical_question(question, biobert, biobert_tokenizer, biogpt, biogpt_tokenizer, embedder, rag_index, id_to_text):
+    try:
+        if not isinstance(question, str):
+            question = str(question)
+
+        # Langkah 1: Retrieval dengan RAG
+        query_embedding = embedder.encode(question)
+        _, indices = rag_index.search(np.array([query_embedding]).astype('float32'), k=3)
+
+        indices = np.array(indices).flatten()
+
+        contexts = []
+        for idx in indices:
+            if idx >= 0 and idx in id_to_text:
+                q, a = id_to_text[idx]
+                contexts.append(f"Q: {q}\nA: {a}")
+
+        if not contexts:
+            raise MedicalChatError("Tidak ditemukan konteks medis yang relevan")
+
+        medical_context = "\n\n".join(contexts)
+
+        # Langkah 2: Generasi jawaban
+        prompt = f"""Berdasarkan konteks:\n{medical_context}\n\nJawab pertanyaan:\n{question}\n\nDengan:
+        - Bahasa sederhana
+        - Berikan rekomendasi pertolongan pertama
+        - Sertakan ketidakpastian jika perlu
+        - Sarankan konsultasi dokter"""
+
+        inputs = biogpt_tokenizer(prompt, return_tensors="pt").to(biogpt.device)
+        output = biogpt.generate(
+            **inputs,
+            max_new_tokens=300,
+            num_beams=3,
+            top_p=0.85,
+            do_sample=True,
+            temperature=0.7,
+            output_scores=True,
+            return_dict_in_generate=True
+        )
+
+        probs = torch.softmax(output.scores[0], dim=-1)
+        avg_prob = probs.mean().item()
+
+        draft = biogpt_tokenizer.decode(output.sequences[0], skip_special_tokens=True)
+
+        # Langkah 3: Hitung confidence baru
+        confidence = calculate_confidence(draft, medical_context, question, embedder)
+
+        # Langkah 4: Refinement dengan Gemini
+        try:
+            genai.configure(api_key="AIzaSyAzejYOIcl_0xkPRjZVNaWUkUB0-ZL29Pk")  # Ganti dengan API key
+            model = genai.GenerativeModel('gemini-1.5-flash')
+            refined = model.generate_content(f"Sebagai dokter senior yang paham etika, sederhanakan ini:\n{draft}")
+            final_response = refined.text
+
+            confidence = calculate_confidence(final_response, medical_context, question, embedder)
+
+            return {
+                "response": final_response,
+                "confidence": confidence["confidence_score"],
+                "confidence_metrics": confidence["metrics"],
+                "generation_prob": avg_prob
+            }
+        except:
+            return {
+                "response": draft,
+                "confidence": confidence["confidence_score"],
+                "confidence_metrics": confidence["metrics"],
+                "generation_prob": avg_prob
+            }
+    except Exception as e:
+        raise MedicalChatError(f"Error processing question: {str(e)}")
+
+# ===== 8. MODIFIED BENCHMARKING =====
 TEST_CASES = [
     {
-        "input": "Saya sering haus dan penglihatan kabur",
-        "expected_output": "diabetes",
-        "expected_keywords": ["haus", "penglihatan kabur"]
+        "input": "Apa gejala umum diabetes?",
+        "expected_keywords": ["gula darah", "haus", "poliuria"]
     },
     {
-        "input": "Kepala saya sakit dan mimisan",
-        "expected_output": "hipertensi",
-        "expected_keywords": ["sakit kepala", "mimisan"]
+        "input": "Bagaimana cara mengatasi demam?",
+        "expected_keywords": ["parasetamol", "istirahat", "cairan"]
     }
 ]
 
-def run_benchmark():
+def run_benchmark(biobert, biobert_tokenizer, biogpt, biogpt_tokenizer, embedder, rag_index, id_to_text):
     results = []
     for case in TEST_CASES:
         try:
-            response = answer_medical_question(case["input"])
-            evaluation = simple_evaluate(
-                response.lower(),
-                case["expected_output"]
+            start_time = time.time()
+            result = answer_medical_question(
+                case["input"],
+                biobert, biobert_tokenizer,
+                biogpt, biogpt_tokenizer,
+                embedder, rag_index, id_to_text
             )
+            latency = time.time() - start_time
 
-            # Deteksi keywords
             detected_keywords = [
                 kw for kw in case["expected_keywords"]
-                if kw in response.lower()
+                if kw.lower() in result["response"].lower()
             ]
+            accuracy = len(detected_keywords)/len(case["expected_keywords"])
 
             results.append({
                 "test_case": case["input"],
-                "keyword_accuracy": evaluation["keyword_accuracy"],
-                "exact_match": evaluation["exact_match"],
-                "keywords_detected": len(detected_keywords),
-                "response": response[:100] + "..."  # Potong response untuk display
+                "accuracy": f"{accuracy:.0%}",
+                "confidence": f"{result['confidence']:.0%}",
+                "keywords_found": ", ".join(detected_keywords),
+                "response": result["response"][:100] + "...",
+                "latency": f"{latency:.2f}s"
             })
-
         except Exception as e:
             results.append({
                 "test_case": case["input"],
@@ -216,50 +355,126 @@ def run_benchmark():
 
     return pd.DataFrame(results)
 
-# ===== 7. Enhanced UI =====
-def create_ui():
-    text_input = widgets.Textarea(placeholder="Deskripsikan gejala Anda...")
+# ===== 9. UPDATED UI WITH NEW METRICS =====
+def create_ui(biobert, biobert_tokenizer, biogpt, biogpt_tokenizer, embedder, rag_index, id_to_text):
+    text_input = widgets.Textarea(placeholder="Masukkan pertanyaan medis...")
     output = widgets.Output()
+    confidence_gauge = widgets.FloatProgress(
+        value=0,
+        min=0,
+        max=1,
+        description='Confidence:',
+        bar_style='info',
+        style={'bar_color': '#FFA500'},
+        orientation='horizontal'
+    )
+
+    def update_confidence_display(confidence, metrics):
+        if confidence > 0.7:
+            confidence_gauge.bar_style = 'success'
+            confidence_gauge.style.bar_color = 'green'
+        elif confidence > 0.4:
+            confidence_gauge.bar_style = 'warning'
+            confidence_gauge.style.bar_color = 'orange'
+        else:
+            confidence_gauge.bar_style = 'danger'
+            confidence_gauge.style.bar_color = 'red'
+        confidence_gauge.value = confidence
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatterpolar(
+            r=list(metrics.values()),
+            theta=list(metrics.keys()),
+            fill='toself',
+            name='Confidence Metrics'
+        ))
+        fig.update_layout(
+            polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+            showlegend=False,
+            title="Confidence Metrics Breakdown"
+        )
+        display(fig)
 
     def on_submit(btn):
         with output:
             output.clear_output()
-            display(Markdown(f"**👨⚕️ Pasien**: {text_input.value}"))
+            question = text_input.value.strip()
+            if not question:
+                return
+
+            display(Markdown(f"**🧑⚕️ Pertanyaan**: {question}"))
 
             try:
                 start_time = time.time()
-                response = answer_medical_question(text_input.value)
+                result = answer_medical_question(
+                    question,
+                    biobert, biobert_tokenizer,
+                    biogpt, biogpt_tokenizer,
+                    embedder, rag_index, id_to_text
+                )
                 latency = time.time() - start_time
 
+                update_confidence_display(result["confidence"], result["confidence_metrics"])
+
+                if result["confidence"] < 0.4:
+                    warning = "⚠️ **Warning**: Jawaban mungkin kurang akurat (confidence rendah)"
+                elif result["confidence"] < 0.7:
+                    warning = "⚠️ **Note**: Jawaban mungkin memerlukan verifikasi"
+                else:
+                    warning = "✅ **High Confidence**"
+
                 display(Markdown(f"""
-                **🤖 Asisten Medis** (Waktu respon: {latency:.2f}s):
-                {response}
+                **🤖 Jawaban** ({latency:.2f}s | Confidence: {result['confidence']:.0%})
+                {warning}
+                {result['response']}
                 """))
 
-            except MedicalChatError as e:
-                display(Markdown(f"**❌ Error**: {str(e)}"))
-            except Exception as e:
-                display(Markdown("**⚠️ Sistem sibuk**. Silakan coba lagi nanti."))
+                with widgets.Accordion(selected_index=None):
+                    display(widgets.VBox([
+                        widgets.HTML("<b>Detail Confidence Metrics:</b>"),
+                        widgets.HTML(f"Semantic Similarity: {result['confidence_metrics']['semantic_similarity']:.2f}"),
+                        widgets.HTML(f"Completeness: {result['confidence_metrics']['completeness']:.2f}"),
+                        widgets.HTML(f"Medical Terms: {result['confidence_metrics']['medical_terms']:.2f}"),
+                        widgets.HTML(f"Certainty: {result['confidence_metrics']['certainty']:.2f}"),
+                        widgets.HTML(f"Structure: {result['confidence_metrics']['structure']:.2f}")
+                    ]))
 
-    submit = widgets.Button(description="Diagnosis", button_style='success')
+            except Exception as e:
+                display(Markdown(f"**❌ Error**: {str(e)}"))
+
+    submit = widgets.Button(description="Dapatkan Jawaban", button_style='success')
     submit.on_click(on_submit)
 
     display(widgets.VBox([
-        widgets.HTML("<h2 style='color: #3b82f6'>🩺 MedicalAI Chatbot</h2>"),
-        widgets.HTML("<i>Untuk pertanyaan medis non-darurat</i>"),
+        widgets.HTML("<h1 style='color: #3b82f6'>🩺 MedicalAI (Confidence Monitoring)</h1>"),
+        widgets.HTML("<i>Sistem informasi medis dengan confidence scoring</i>"),
         text_input,
         submit,
+        confidence_gauge,
         output
     ]))
 
-# ===== 8. Main Execution =====
+# ===== 10. MAIN EXECUTION =====
 if __name__ == "__main__":
-    print("🔍 Memuat model...")
-    biobert, biobert_tokenizer, biogpt, biogpt_tokenizer = load_models()
+    print("🚀 Inisialisasi sistem dengan confidence monitoring...")
+
+    print("🔧 Memuat model AI...")
+    biobert, biobert_tokenizer, biogpt, biogpt_tokenizer, embedder = load_models()
+
+    print("📊 Membangun database medis...")
+    rag_index, id_to_text = setup_medical_rag(embedder)
 
     print("🧪 Menjalankan benchmark...")
-    benchmark_results = run_benchmark()
+    benchmark_results = run_benchmark(
+        biobert, biobert_tokenizer,
+        biogpt, biogpt_tokenizer,
+        embedder, rag_index, id_to_text
+    )
     display(benchmark_results)
 
-    print("🚀 Launching UI...")
-    create_ui()
+    print("🖥️ Menjalankan UI...")
+    create_ui(
+        biobert, biobert_tokenizer,
+        biogpt, biogpt_tokenizer,
+        embedder, rag_index, id_to_text
+    )
