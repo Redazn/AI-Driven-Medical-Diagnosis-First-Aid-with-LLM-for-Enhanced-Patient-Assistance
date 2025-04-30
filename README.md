@@ -120,7 +120,7 @@ Proyek ini adalah **chatbot berbasis AI** yang dirancang untuk membantu diagnosi
 ---
 
 ## **Lisensi**
-Proyek ini berlisensi di bawah Apache 2.0 License, yang memungkinkan penggunaan bebas untuk keperluan edukasi dan penelitian, baca selengkapnya [Apache 2.0](LICENSE).
+Proyek ini berlisensi di bawah Apache 2.0 License, yang memungkinkan penggunaan, memodifikasi dan distribusi bebas, termasuk untuk keperluan edukasi dan penelitian, selama syarat Lisensi terpenuhi [Apache 2.0](LICENSE).
 
 ---
 
