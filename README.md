@@ -140,3 +140,4 @@ Jika Anda memiliki pertanyaan atau saran, silakan hubungi melalui [issues](https
 
 
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
+![Hugging Face Transformers](https://img.shields.io/badge/Transformers-Hugging%20Face-yellow)
