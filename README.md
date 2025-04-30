@@ -120,7 +120,7 @@ Proyek ini adalah **chatbot berbasis AI** yang dirancang untuk membantu diagnosi
 ---
 
 ## **Lisensi**
-Proyek ini berlisensi di bawah [MIT License](LICENSE), yang memungkinkan penggunaan bebas untuk tujuan komersial maupun non-komersial.
+Proyek ini berlisensi di bawah [Apache 2.0 License](LICENSE), yang memungkinkan penggunaan bebas untuk tujuan komersial maupun non-komersial.
 
 ---
 
