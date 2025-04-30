@@ -76,10 +76,10 @@ Proyek ini adalah **chatbot berbasis AI** yang dirancang untuk membantu diagnosi
    ```bash
    pip install -r requirements.txt
    ```
-3. Ganti API key Anda: '''genai.configure(api_key="GANTI_API_KEY_ANDA")  # Ganti dengan API key
+3. Ganti API key Anda: ```genai.configure(api_key="GANTI_API_KEY_ANDA")  # Ganti dengan API key
             model = genai.GenerativeModel('gemini-1.5-flash')
             refined = model.generate_content(f"Sebagai dokter senior yang paham etika, sederhanakan ini:\n{draft}")
-            final_response = refined.text'''
+            final_response = refined.text```
 
 ---
 
