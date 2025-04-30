@@ -1,7 +1,11 @@
-transformers 
-torch 
+transformers
+torch
 google-generativeai 
 ipywidgets 
 sacremoses 
+rouge-score 
+faiss-cpu 
+sentence-transformers 
+datasets 
 evaluate 
-rouge_score
+plotly
