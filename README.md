@@ -1,5 +1,3 @@
- **`AI-Driven Medical Diagnosis & First Aid with LLM for Enhanced Patient Assistance`**. Dokumentasi ini mencakup deskripsi proyek, fitur utama, cara instalasi, cara penggunaan, batasan, dan pengembangan di masa mendatang.
-
 ---
 
 # **AI-Driven Medical Diagnosis & First Aid with LLM for Enhanced Patient Assistance**
