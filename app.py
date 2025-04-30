@@ -285,7 +285,7 @@ def answer_medical_question(question, biobert, biobert_tokenizer, biogpt, biogpt
 
         # Langkah 4: Refinement dengan Gemini
         try:
-            genai.configure(api_key="AIzaSyAzejYOIcl_0xkPRjZVNaWUkUB0-ZL29Pk")  # Ganti dengan API key
+            genai.configure(api_key="GANTI_API_KEY_ANDA")  # Ganti dengan API key
             model = genai.GenerativeModel('gemini-1.5-flash')
             refined = model.generate_content(f"Sebagai dokter senior yang paham etika, sederhanakan ini:\n{draft}")
             final_response = refined.text
