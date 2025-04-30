@@ -1,195 +1,140 @@
-# AI-Driven-Medical-Diagnosis-First-Aid-with-LLM-for-Enhanced-Patient-Assistance
-
-
-Project ini adalah chatbot berbasis AI yang membantu memberikan edukasi dan analisis awal terhadap gejala medis yang dirasakan pasien. Chatbot ini menggunakan kombinasi model BioBERT, BioGPT, dan Gemini untuk mendeteksi kondisi, memberikan penjelasan, dan merekomendasikan konsultasi dengan spesialis terkait.
-
+ **`AI-Driven Medical Diagnosis & First Aid with LLM for Enhanced Patient Assistance`**. Dokumentasi ini mencakup deskripsi proyek, fitur utama, cara instalasi, cara penggunaan, batasan, dan pengembangan di masa mendatang.
 
 ---
 
-Fitur Utama
+# **AI-Driven Medical Diagnosis & First Aid with LLM for Enhanced Patient Assistance**
 
-Ekstraksi entitas medis dengan BioBERT
+## **Deskripsi Proyek**
+Proyek ini adalah **chatbot berbasis AI** yang dirancang untuk membantu diagnosis medis awal dan memberikan saran pertolongan pertama. Dengan menggabungkan kekuatan **Large Language Models (LLMs)** seperti BioGPT dan BioBERT, sistem ini memperkaya pengalaman pengguna melalui:
+- **Retrieval-Augmented Generation (RAG)** untuk pencarian jawaban akurat dari dataset medis.
+- **Confidence Scoring System** untuk memberikan kepercayaan pada keluaran sistem.
+- **Refinement** menggunakan Gemini AI untuk meningkatkan kualitas respons.
 
-Deteksi kondisi dan pencocokan gejala menggunakan database medis statis
-
-Generasi jawaban medis awal menggunakan BioGPT
-
-Penyempurnaan dan penyederhanaan bahasa medis menggunakan Gemini
-
-Antarmuka pengguna interaktif berbasis IPython widgets
-
-
+> **Catatan Penting**:
+> Aplikasi ini bertujuan untuk memberikan informasi medis yang edukatif dan **tidak menggantikan diagnosis atau konsultasi medis profesional**.
 
 ---
 
-Arsitektur
+## **Fitur Utama**
+### **1. Integrasi LLMs**
+- **BioBERT**: Digunakan untuk ekstraksi entitas medis dari input pengguna.
+- **BioGPT**: Digunakan untuk menghasilkan teks berbasis gejala medis dan konteks.
+- **Gemini AI**: Untuk penyempurnaan jawaban sehingga lebih mudah dipahami oleh pengguna.
 
-1. BioBERT: Untuk ekstraksi entitas dari pertanyaan medis
+### **2. Retrieval-Augmented Generation (RAG)**
+- Menerapkan **FAISS** sebagai mesin pencari berbasis embedding untuk mengambil jawaban dari dataset medis.
+- Dataset yang digunakan meliputi **MedQuad**, **Medical Meadow Flashcards**, dan **Medical Meadow WikiDoc**.
 
+### **3. Confidence Scoring System**
+- Sistem penilaian kepercayaan menghitung skor berdasarkan:
+  - **Semantic similarity** antara konteks dan jawaban.
+  - **Completeness** dari respons terhadap pertanyaan.
+  - **Medical terminology** yang digunakan dalam jawaban.
+  - **Certainty** dan analisis ketidakpastian dalam respons.
+  - **Length appropriateness** untuk memastikan panjang jawaban relevan.
+  - **Structure assessment** untuk memastikan format jawaban terstruktur.
 
-2. BioGPT: Untuk menghasilkan draft jawaban berdasarkan instruksi format medis
+### **4. User Interface (UI)**
+- **Berbasis Jupyter Notebook** menggunakan `ipywidgets` untuk input pertanyaan dan visualisasi metrik kepercayaan.
+- **Confidence Gauge**: Menampilkan tingkat kepercayaan jawaban secara visual.
+- **Polar Chart Visualization**: Memvisualisasikan metrik kepercayaan menggunakan `plotly`.
 
-
-3. Gemini 1.5 Flash: Untuk menyederhanakan dan merapikan jawaban akhir
-
-
-4. Database Medis: 15 Format dictionary statis berisi gejala, obat, spesialis, dan kode ICD-10 (bisa ditambahkan manual, untuk kebutuhan spesifik)
-
-
-5. Benchmark Tools: Evaluasi performa berbasis keyword matching dan exact match
-
-
-
-
----
-
-Instalasi
-
-pip install transformers torch evaluate google-generativeai ipywidgets pandas
-
-
----
-
-Struktur Proyek
-
- main.py
- 
- README.md
-
- requirements.txt
-
+### **5. Benchmarking**
+- Fungsi benchmarking untuk menguji performa sistem terhadap berbagai kasus uji medis.
 
 ---
 
-Cara Menjalankan
-
-python main.py
-
-
----
-
-Hardware dan Kecepatan Inference
-
-Perangkat uji : Google Colab (GPU Tesla T4 with ram 16GB (GDDR6))
-
-Kecepatan Inference (rata-rata):
-
-BioBERT entity extraction: ~0.3s
-
-BioGPT response generation (300 token): ~1.8s
-
-Gemini post-processing: ~1.2s
-
-
-Total Latensi Rata-Rata: 3.3s per pertanyaan
-
-
+## **Struktur Proyek**
+- `app.py`: File utama yang mencakup semua logika sistem, termasuk pemrosesan input, model loading, RAG, confidence scoring, dan UI.
+- `requirements.txt`: Daftar dependensi Python yang diperlukan untuk menjalankan proyek.
 
 ---
 
-API Gemini
-
-Pastikan untuk mengganti API_KEY_ANDA dengan API key dari Google Gemini di bagian konfigurasi:
-
-genai.configure(api_key="API_KEY_ANDA")
-
-
----
-
-Test Case dan Evaluasi
-
-Sistem diuji dengan 10 kasus gejala umum:
-
-
-Hasil evaluasi mencakup:
-
-=Recall sensivity, Precision, Specificity, Threshold
-
-Keyword Accuracy
-
-= Moderade, akurasi (70%-80%) tapi risk underdiagnosis untuk kondisi serius.
-
-Exact Match
-
-= Perlu banyak Penyempitan DDx dengan skor klinis, Threshold terlalu konservatif untuk gejala beresiko tinggi
-
-Deteksi kata kunci gejala
-
-= Precision, False positif tinggi. Recall, False negatif tinggi. Threshold, tidak optimal.
+## **Teknologi yang Digunakan**
+- **Bahasa Pemrograman**: Python
+- **Framework dan Library**:
+  - `transformers`, `torch`: Untuk integrasi LLMs.
+  - `sentence-transformers`, `faiss`: Untuk RAG dan embedding.
+  - `ipywidgets`, `plotly`: Untuk antarmuka pengguna.
+  - `google-generativeai`: Untuk penyempurnaan jawaban dengan Gemini AI.
 
 ---
 
-Contoh Kinerja
+## **Cara Instalasi**
+### **1. Persyaratan Sistem**
+- Python 3.8 atau lebih baru
+- GPU dengan CUDA (opsional, untuk akselerasi pemrosesan)
+- Jupyter Notebook atau JupyterLab
 
-Pasien: badan saya sering nyeri, kadang tulang tuh sering kaku di saat bangun tidur 
-
-🤖 Asisten Medis (Waktu respon: 3.56s):
-
-        ### Diagnosis Kemungkinan
-Nyeri tubuh dan kekakuan sendi, terutama di pagi hari, bisa disebabkan beberapa hal. Bayangkan tubuhmu seperti mobil tua yang perlu pelumas. Bisa jadi "pelumas" sendimu (cairan sinovial) berkurang, sehingga pergerakan terasa kaku dan nyeri. Ini bisa terjadi karena usia, kurang gerak, atau bahkan kondisi seperti arthritis (radang sendi). Atau mungkin ada otot yang tegang karena aktivitas atau posisi tidur yang salah. 
-
-💊 Rekomendasi Obat: Parasetamol (Paracetamol): Obat pereda nyeri yang dijual bebas. Ikuti petunjuk dosis pada kemasan. Jangan melebihi dosis maksimal harian.Ibuprofen (Brufen, dll.): Obat anti-inflamasi nonsteroid (OAINS) yang juga dijual bebas, membantu mengurangi peradangan dan nyeri. Ikuti petunjuk dosis pada kemasan. Jangan digunakan jika Anda memiliki riwayat maag. 
-
-🏥 Konsultasi Spesialis: Jika nyeri dan kekakuan terus berlanjut atau memburuk, sebaiknya konsultasikan ke dokter umum atau spesialis Reumatologi (ahli penyakit sendi dan rematik) atau Ortopedi (ahli penyakit tulang dan sendi). 
-
-⚠️ Peringatan: Hasil ini bukan diagnosis pasti. Segera hubungi dokter jika nyeri sangat hebat, disertai demam, bengkak di sendi yang signifikan, atau keluhan lain yang mengkhawatirkan. Jangan mengonsumsi obat-obatan OTC secara berlebihan tanpa berkonsultasi dengan dokter. 
-
-📌 Kode ICD-10: (Tidak dapat diberikan tanpa pemeriksaan fisik dan diagnosa pasti. Kode ICD-10 akan diberikan oleh dokter setelah pemeriksaan
-
-Contoh Kinerja ke 2
-
-kepala saya pusing dan badan saya panas, apakah saya harus meminum paracetamol?
-
-            **🤖 Asisten Medis** (Waktu respon: 3.59s):
-            ### Diagnosis Kemungkinan
-Kepala pusing dan badan panas bisa seperti mobil yang overheat. Mesinnya (tubuh Anda) bekerja terlalu keras dan butuh didinginkan. Bisa karena demam, infeksi ringan, atau kelelahan. Tapi, bisa juga karena hal lain yang lebih serius, jadi kita perlu memastikannya.
-
-💊 Rekomendasi Obat:
-
-Paracetamol (atau Acetaminophen) bisa membantu menurunkan demam dan mengurangi rasa sakit kepala. Ikuti petunjuk penggunaan pada kemasan. Biasanya dosis untuk dewasa adalah 500mg – 1000mg setiap 4-6 jam, maksimal 4000mg dalam sehari. Jangan melebihi dosis yang dianjurkan.
-
-🏥 Konsultasi Spesialis:
-
-Jika gejala Anda memburuk (misalnya demam tinggi yang tidak turun, pusing yang hebat, muntah-muntah, atau muncul gejala lain seperti kaku kuduk), sebaiknya segera konsultasi ke dokter umum.
-
-⚠️ Peringatan:
-
-Hasil ini bukan diagnosis pasti. Segera hubungi dokter jika demam Anda lebih dari 3 hari, disertai sakit kepala hebat, kesulitan bernapas, rasa sakit dada, kejang, atau ruam kulit. Paracetamol juga dapat menyebabkan efek samping, baca informasi lengkap pada kemasan.
-
-📌 Kode ICD-10: Tidak dapat diberikan tanpa pemeriksaan fisik. Kode ICD-10 bervariasi tergantung diagnosis pasti.
+### **2. Instalasi Dependensi**
+1. Clone repositori:
+   ```bash
+   git clone https://github.com/Redazn/AI-Driven-Medical-Diagnosis-First-Aid-with-LLM-for-Enhanced-Patient-Assistance.git
+   cd AI-Driven-Medical-Diagnosis-First-Aid-with-LLM-for-Enhanced-Patient-Assistance
+   ```
+2. Instal semua dependensi:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ---
 
-Penanganan Error dan Etika
+## **Cara Penggunaan**
+### **1. Menjalankan Aplikasi**
+1. Buka Jupyter Notebook:
+   ```bash
+   jupyter notebook
+   ```
+2. Jalankan file `app.py`.
 
-Tiga kelas error utama:
+### **2. Menggunakan Antarmuka**
+- Masukkan pertanyaan medis ke dalam kotak teks.
+- Klik **"Dapatkan Jawaban"** untuk menerima respons dari sistem.
+- Visualisasi tingkat kepercayaan jawaban akan ditampilkan melalui **Confidence Gauge** dan **Polar Chart**.
 
-SafetyFilterError: Prompt diblokir oleh sistem
-
-ModelOverloadError: Keterbatasan memori GPU
-
-MedicalChatError: Error umum lainnya dalam proses
-
-
-
----
-
-Catatan Penggunaan
-
-> Penting: model AI ini bukan pengganti diagnosis medis profesional. Selalu konsultasi dokter untuk penyesuaian kebutuhan anda.
-
-
-
+### **3. Menjalankan Benchmark**
+- Fungsi `run_benchmark()` akan otomatis dijalankan untuk menguji performa sistem terhadap kasus uji.
 
 ---
 
-Lisensi
-
-Project ini open-source dan bebas digunakan untuk keperluan edukasi dan penelitian. Mohon sertakan atribusi apabila digunakan secara publik. License Apache 2.0
-
+## **Batasan Sistem**
+1. **Bukan Pengganti Diagnosis Medis**:
+   - Aplikasi ini tidak dimaksudkan untuk menggantikan konsultasi dokter atau diagnosis profesional.
+2. **Ketergantungan pada Dataset**:
+   - Akurasi jawaban tergantung pada data yang tersedia di dataset medis.
+3. **Keterbatasan GPU**:
+   - Penggunaan GPU disarankan untuk performa optimal, tetapi fallback ke CPU tersedia.
+4. **Keamanan Data**:
+   - Belum ada enkripsi untuk input pengguna; tidak cocok untuk data pribadi yang sensitif.
 
 ---
 
-Kontributor
+## **Pengembangan Selanjutnya**
+1. **Deployment Berbasis Web**:
+   - Menggunakan framework seperti Streamlit atau FastAPI untuk membuat aplikasi lebih mudah diakses.
+2. **Ekspansi Dataset**:
+   - Menambahkan lebih banyak dataset untuk memperluas cakupan kondisi medis.
+3. **Optimasi Confidence Scoring**:
+   - Mengintegrasikan model evaluasi otomatis untuk meningkatkan akurasi skor.
+4. **Keamanan Data**:
+   - Implementasi enkripsi untuk melindungi data pengguna.
 
-Riset pribadi
+---
+
+## **Lisensi**
+Proyek ini berlisensi di bawah [MIT License](LICENSE), yang memungkinkan penggunaan bebas untuk tujuan komersial maupun non-komersial.
+
+---
+
+## **Kontribusi**
+Kontribusi sangat dihargai! Jika Anda ingin berkontribusi:
+1. Fork repositori ini.
+2. Buat branch baru untuk fitur atau perbaikan Anda.
+3. Kirim Pull Request (PR) dengan deskripsi yang jelas.
+
+---
+
+## **Kontak**
+Jika Anda memiliki pertanyaan atau saran, silakan hubungi melalui [issues](https://github.com/Redazn/AI-Driven-Medical-Diagnosis-First-Aid-with-LLM-for-Enhanced-Patient-Assistance/issues).
+
+---
