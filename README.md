@@ -137,3 +137,6 @@ Kontribusi sangat dihargai! Jika Anda ingin berkontribusi:
 Jika Anda memiliki pertanyaan atau saran, silakan hubungi melalui [issues](https://github.com/Redazn/AI-Driven-Medical-Diagnosis-First-Aid-with-LLM-for-Enhanced-Patient-Assistance/issues).
 
 ---
+
+
+![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
